@@ -1,7 +1,93 @@
 ﻿@page "/"
 
-<h1>Hello, world!</h1>
+<div class="sticky-top p-2 bg-light">
+    <p>
+        本日摂取したカフェインが致死量の目安(3000mg/日)を超えているか調べることができます。
+        本日摂取したカフェイン入り飲料の数量を入力してください。
+    </p>
+    <strong>
+        合計摂取量: @SumOfCaffeine() mg/日 <br />
+        評価: @CalucurateCaffeinLimit(SumOfCaffeine())
+    </strong>
+</div>
 
-Welcome to your new app.
+<div class="container-fluid">
+    @if (caffeineItems == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        @foreach (var item in caffeineItems)
+        {
+            <h2>@item.Name <small>(カフェイン含有量 @item.CaffeineAmount mg)</small></h2>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+            <div class="row mb-4">
+                <div class="col-4">
+                    <img src="@item.ImageURI" alt="Sample Photo" />
+                </div>
+                <div class="col-8">
+                    <label>
+                        数量: <input type="number"
+                                   id="@item.ID"
+                                   value=@item.Quantity
+                                   @onchange="@((e) => item.Quantity = int.Parse(e.Value.ToString()))"> @(item.Quantity*item.CaffeineAmount)  (mg)
+                    </label>
+                </div>
+            </div>
+        }
+        <div class="m-2">
+            <h2>その他</h2>
+            <input type="number" @bind-value="@otherCaffeine"> @otherCaffeine (mg)
+        </div>
+    }
+</div>
+
+
+@code {
+    public class CaffeineItem
+    {
+        public int ID { get; set; }
+        public string Name { get; set; }
+        public int CaffeineAmount { get; set; }
+        public int Quantity { get; set; }
+        public string ImageURI { get; set; }
+    }
+
+    private List<CaffeineItem> caffeineItems;
+    private int otherCaffeine;
+    private int limitCaffeine = 3000;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Run(() =>
+        {
+            caffeineItems = new List<CaffeineItem>();
+            caffeineItems.Add(new CaffeineItem() { ID = 1, Name = "コーヒー1杯", CaffeineAmount = 60, Quantity = 0, ImageURI = "image/coffee01_blend.png" });
+            caffeineItems.Add(new CaffeineItem() { ID = 2, Name = "紅茶1杯", CaffeineAmount = 30, Quantity = 0, ImageURI = "image/cafe_tea.png" });
+            caffeineItems.Add(new CaffeineItem() { ID = 3, Name = "煎茶1杯", CaffeineAmount = 20, Quantity = 0, ImageURI = "image/tea1.png" });
+            caffeineItems.Add(new CaffeineItem() { ID = 4, Name = "ウーロン茶1杯", CaffeineAmount = 20, Quantity = 0, ImageURI = "image/drink_uroncha_bottle.png" });
+            caffeineItems.Add(new CaffeineItem() { ID = 5, Name = "レッドブル", CaffeineAmount = 80, Quantity = 0, ImageURI = "image/drink_energy_can.png" });
+            caffeineItems.Add(new CaffeineItem() { ID = 6, Name = "モンスターエナジー", CaffeineAmount = 142, Quantity = 0, ImageURI = "image/drink_energy_can.png" });
+        });
+    }
+
+    private int SumOfCaffeine()
+    {
+        return caffeineItems.Select(x => x.Quantity * x.CaffeineAmount).Sum() + otherCaffeine;
+    }
+
+    private string CalucurateCaffeinLimit(int caffeinAmount)
+    {
+
+        if (caffeinAmount >= limitCaffeine)
+        {
+            return "致死量の目安を超えました。";
+        }
+        else
+        {
+            return "致死量の目安を超えていません。";
+        }
+    }
+}
+
