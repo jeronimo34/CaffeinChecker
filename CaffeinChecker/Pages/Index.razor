@@ -1,23 +1,24 @@
 ﻿@page "/"
 
-<div class="sticky-top p-2 bg-light">
-    <p>
-        本日摂取したカフェインが致死量の目安(3000mg/日)を超えているか調べることができます。
-        本日摂取したカフェイン入り飲料の数量を入力してください。
-    </p>
-    <strong>
-        合計摂取量: @SumOfCaffeine() mg/日 <br />
-        評価: @CalucurateCaffeinLimit(SumOfCaffeine())
-    </strong>
-</div>
+@if (caffeineItems == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="sticky-top p-2 bg-light">
+        <p>
+            本日摂取したカフェインが致死量の目安(3000mg/日)を超えているか調べることができます。
+            本日摂取したカフェイン入り飲料の数量を入力してください。
+        </p>
+        <strong>
+            合計摂取量: @SumOfCaffeine() mg/日 <br />
+            評価: @CalucurateCaffeinLimit(SumOfCaffeine())
+        </strong>
+    </div>
 
-<div class="container-fluid">
-    @if (caffeineItems == null)
-    {
-        <p><em>Loading...</em></p>
-    }
-    else
-    {
+    <div class="container-fluid">
+
         @foreach (var item in caffeineItems)
         {
             <h2>@item.Name <small>(カフェイン含有量 @item.CaffeineAmount mg)</small></h2>
@@ -40,9 +41,9 @@
             <h2>その他</h2>
             <input type="number" @bind-value="@otherCaffeine"> @otherCaffeine (mg)
         </div>
-    }
-</div>
 
+    </div>
+}
 
 @code {
     public class CaffeineItem
